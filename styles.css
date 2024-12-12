@@ -1,0 +1,16 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+#map {
+    background-color: lightgray; /* Debugging color */
+    margin-bottom: 20px;
+    height: 400px;
+}
+
+#chart {
+    background-color: lightblue; /* Debugging color */
+    height: 400px;
+}

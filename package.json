@@ -1,0 +1,11 @@
+{
+  "name": "leaflet-echarts-duckdb",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "duckdb": "^1.1.3",
+    "echarts": "^5.5.1",
+    "leaflet": "^1.9.4"
+  }
+}
