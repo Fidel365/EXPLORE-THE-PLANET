@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaflet and ECharts Test</title>
+    <title>Leaflet and ECharts Enhanced</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.2/dist/echarts.min.js"></script>
     <style>
@@ -12,96 +12,43 @@
             margin: 0;
             padding: 0;
         }
-
         #map {
-            background-color: lightgray; /* Debugging color */
+            height: 400px;
             margin-bottom: 20px;
-            height: 400px;
         }
-
         #chart {
-            background-color: lightblue; /* Debugging color */
             height: 400px;
         }
-
-        #search-container {
+        #controls {
+            display: flex;
+            justify-content: space-between;
             padding: 10px;
-            text-align: center;
-            margin-top: 10px;
+            background: #f4f4f4;
+            border-top: 1px solid #ccc;
         }
-
-        #searchInput {
-            width: 200px;
-            padding: 5px;
-        }
-
-        #searchBtn {
-            padding: 5px 10px;
-            margin-left: 10px;
+        #controls > * {
+            margin: 0 5px;
         }
     </style>
 </head>
 <body>
-    <div id="search-container">
-        <input type="text" id="searchInput" placeholder="Search location..." />
-        <button id="searchBtn">Search</button>
+    <div id="controls">
+        <select id="languageSelect">
+            <option value="en" selected>English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+        </select>
+        <button id="resetMap">Reset Map</button>
+        <button id="updateChart">Update Chart</button>
+        <button id="downloadChart">Download Chart</button>
+        <button id="themeToggle">Toggle Theme</button>
     </div>
-
     <div id="map"></div>
     <div id="chart"></div>
+    <input type="file" id="uploadData" accept=".json,.csv" style="display:none" />
+    <label for="uploadData" style="cursor:pointer; display:block; text-align:center; margin-top:10px;">Upload Data for Chart</label>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Initialize Leaflet map
-            const map = L.map('map').setView([51.505, -0.09], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
-
-            // Initialize ECharts chart
-            const chart = echarts.init(document.getElementById('chart'));
-            chart.setOption({
-                title: { text: 'Test Chart' },
-                xAxis: { type: 'category', data: ['A', 'B', 'C'] },
-                yAxis: { type: 'value' },
-                series: [{ type: 'bar', data: [5, 20, 36] }]
-            });
-
-            // Search button functionality
-            document.getElementById('searchBtn').addEventListener('click', async () => {
-                const query = document.getElementById('searchInput').value;
-
-                if (!query) {
-                    alert("Please enter a location name.");
-                    return;
-                }
-
-                // Use Nominatim API to fetch geocoding data
-                const geoUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=1`;
-                try {
-                    const response = await fetch(geoUrl);
-                    const results = await response.json();
-
-                    if (results.length === 0) {
-                        alert("Location not found. Please try another name.");
-                        return;
-                    }
-
-                    // Extract the first result's coordinates
-                    const { lat, lon, display_name } = results[0];
-
-                    // Pan the map and add a marker
-                    map.setView([lat, lon], 13);
-                    const marker = L.marker([lat, lon]).addTo(map);
-                    marker.bindPopup(`Found: ${display_name}`).openPopup();
-                } catch (error) {
-                    console.error("Error fetching geocoding data:", error);
-                    alert("An error occurred while searching for the location.");
-                }
-            });
-        });
-    </script>
+    <script src="main.js"></script>
 </body>
 </html>

@@ -1,22 +1,21 @@
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("DOM fully loaded and parsed");
-
     /** Leaflet Map Setup **/
-    const map = L.map('map').setView([51.505, -0.09], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+    const map = L.map("map").setView([51.505, -0.09], 13);
+    const baseLayers = {
+        Streets: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap contributors" }),
+        Satellite: L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap contributors" })
+    };
+    baseLayers.Streets.addTo(map);
 
-    // Add Marker on Click with Weather Info
-    map.on('click', async function (e) {
+    L.control.layers(baseLayers).addTo(map);
+
+    /** Search and Weather Features **/
+    map.on("click", async function (e) {
         const { lat, lng } = e.latlng;
-
-        // Fetch Weather Data
-        const apiKey = 'your_openweathermap_api_key'; // Use your API key from OpenWeatherMap
+        const apiKey = "your_openweathermap_api_key";
         const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${apiKey}&units=metric`;
 
-        let weatherInfo = 'Weather data unavailable';
+        let weatherInfo = "Weather data unavailable";
         try {
             const response = await fetch(weatherUrl);
             if (response.ok) {
@@ -32,85 +31,103 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("Error fetching weather data:", error);
         }
 
-        // Add Marker with Popup
         const marker = L.marker([lat, lng]).addTo(map);
         marker.bindPopup(`Location: ${lat.toFixed(2)}, ${lng.toFixed(2)}<br>${weatherInfo}`).openPopup();
-    });
 
-    // Search Bar for Location
-    const searchBox = L.control({ position: 'topleft' });
-    searchBox.onAdd = function () {
-        const input = L.DomUtil.create('input', '');
-        input.type = 'text';
-        input.placeholder = 'Search location...';
-        input.style.padding = "5px";
-        input.style.width = "150px";
-
-        input.addEventListener('change', async function () {
-            const query = input.value;
-            const geoUrl = `https://nominatim.openstreetmap.org/search?q=${query}&format=json`;
-
+        // Refresh weather data every 60 seconds
+        setInterval(async () => {
             try {
-                const response = await fetch(geoUrl);
-                const results = await response.json();
-                if (results.length > 0) {
-                    const { lat, lon } = results[0];
-                    map.setView([lat, lon], 13);
-                    L.marker([lat, lon]).addTo(map).bindPopup(`Search Result: ${query}`).openPopup();
-                } else {
-                    alert("Location not found");
+                const response = await fetch(weatherUrl);
+                if (response.ok) {
+                    const weather = await response.json();
+                    weatherInfo = `
+                        <b>Weather:</b> ${weather.weather[0].description}<br>
+                        <b>Temperature:</b> ${weather.main.temp} °C<br>
+                        <b>Humidity:</b> ${weather.main.humidity}%<br>
+                        <b>Wind Speed:</b> ${weather.wind.speed} m/s
+                    `;
+                    marker.setPopupContent(`Location: ${lat.toFixed(2)}, ${lng.toFixed(2)}<br>${weatherInfo}`);
                 }
             } catch (error) {
-                console.error("Error fetching location:", error);
+                console.error("Error refreshing weather data:", error);
             }
-        });
+        }, 60000);
+    });
 
-        return input;
-    };
-    searchBox.addTo(map);
+    document.getElementById("resetMap").addEventListener("click", () => map.setView([51.505, -0.09], 13));
 
     /** ECharts Setup **/
-    const chart = echarts.init(document.getElementById('chart'));
-    let isDarkTheme = false;
+    const chart = echarts.init(document.getElementById("chart"));
     let chartData = [5, 20, 36];
     const updateChart = (data) => {
         chart.setOption({
-            title: { text: 'Interactive Chart' },
-            tooltip: { trigger: 'item' },
-            xAxis: { type: 'category', data: ['A', 'B', 'C'] },
-            yAxis: { type: 'value' },
+            title: { text: "Interactive Chart" },
+            tooltip: { trigger: "item" },
+            xAxis: { type: "category", data: ["A", "B", "C"] },
+            yAxis: { type: "value" },
             series: [
-                { type: 'bar', data },
-                { type: 'line', data }
+                { type: "bar", data },
+                { type: "line", data }
             ]
         });
     };
 
-    // Initial Chart Render
     updateChart(chartData);
 
-    // Update Chart with User Input
-    document.getElementById('updateChart').addEventListener('click', () => {
-        const valueA = parseInt(document.getElementById('valueA').value) || 0;
-        const valueB = parseInt(document.getElementById('valueB').value) || 0;
-        const valueC = parseInt(document.getElementById('valueC').value) || 0;
+    document.getElementById("updateChart").addEventListener("click", () => {
+        const valueA = parseInt(prompt("Enter value for A:", 5)) || 0;
+        const valueB = parseInt(prompt("Enter value for B:", 20)) || 0;
+        const valueC = parseInt(prompt("Enter value for C:", 36)) || 0;
         chartData = [valueA, valueB, valueC];
         updateChart(chartData);
     });
 
-    // Download Chart as Image
-    document.getElementById('downloadChart').addEventListener('click', () => {
-        const link = document.createElement('a');
-        link.download = 'chart.png';
+    document.getElementById("uploadData").addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (Array.isArray(data)) {
+                        chartData = data;
+                        updateChart(chartData);
+                    } else {
+                        alert("Invalid data format. Please upload a valid JSON array.");
+                    }
+                } catch (error) {
+                    alert("Error reading file: " + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    document.getElementById("downloadChart").addEventListener("click", () => {
+        const link = document.createElement("a");
+        link.download = "chart.png";
         link.href = chart.getDataURL();
         link.click();
     });
 
-    // Toggle Chart Theme
-    document.getElementById('themeToggle').addEventListener('click', () => {
-        isDarkTheme = !isDarkTheme;
-        chart.setOption({ backgroundColor: isDarkTheme ? '#333' : '#fff' });
+    document.getElementById("themeToggle").addEventListener("click", () => {
+        const isDark = chart.getOption().backgroundColor === "#333";
+        chart.setOption({ backgroundColor: isDark ? "#fff" : "#333" });
     });
 
-    console.log("Enhanced map and chart features initialized.");
+    /** Language Change **/
+    document.getElementById("languageSelect").addEventListener("change", (event) => {
+        const lang = event.target.value;
+        const translations = {
+            en: { title: "Interactive Chart", a: "A", b: "B", c: "C" },
+            es: { title: "Gráfico Interactivo", a: "A", b: "B", c: "C" },
+            fr: { title: "Graphique Interactif", a: "A", b: "B", c: "C" }
+        };
+
+        const { title, a, b, c } = translations[lang];
+        chart.setOption({
+            title: { text: title },
+            xAxis: { data: [a, b, c] }
+        });
+    });
 });
