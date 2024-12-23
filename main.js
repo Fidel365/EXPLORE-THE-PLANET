@@ -131,3 +131,12 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+import { CONFIG } from './config.js';
+
+const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${CONFIG.OPEN_WEATHER_MAP_API_KEY}&units=metric`;
+
+const response = await fetch(weatherUrl);
+if (response.ok) {
+    const weather = await response.json();
+    // Process weather data...
+}

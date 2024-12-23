@@ -51,4 +51,26 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="main.js"></script>
 </body>
+<body>
+    <div id="controls">
+        <!-- Add Logout Button -->
+        <button id="logout">Logout</button>
+    </div>
+    <div id="map"></div>
+    <div id="chart"></div>
+
+    <script>
+        // Redirect if not logged in
+        if (!localStorage.getItem("loggedIn")) {
+            window.location.href = "login.html";
+        }
+
+        // Handle Logout
+        document.getElementById("logout").addEventListener("click", () => {
+            localStorage.removeItem("loggedIn");
+            window.location.href = "login.html";
+        });
+    </script>
+    <script src="main.js"></script>
+</body>
 </html>
