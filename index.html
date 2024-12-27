@@ -33,6 +33,8 @@
 </head>
 <body>
     <div id="controls">
+        <input id="searchBar" type="text" placeholder="Search location..." />
+    <button id="searchButton">Search</button>
         <select id="languageSelect">
             <option value="en" selected>English</option>
             <option value="es">Español</option>
@@ -49,7 +51,7 @@
     <label for="uploadData" style="cursor:pointer; display:block; text-align:center; margin-top:10px;">Upload Data for Chart</label>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="main.js"></script>
+<script type="module" src="main.js"></script>
 </body>
 <body>
     <div id="controls">
@@ -64,13 +66,15 @@
         if (!localStorage.getItem("loggedIn")) {
             window.location.href = "login.html";
         }
-
+    
         // Handle Logout
         document.getElementById("logout").addEventListener("click", () => {
             localStorage.removeItem("loggedIn");
+            alert("You have been logged out successfully!");
             window.location.href = "login.html";
         });
     </script>
-    <script src="main.js"></script>
+    
+    <script src="login.js"></script>
 </body>
 </html>

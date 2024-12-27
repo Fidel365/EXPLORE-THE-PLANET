@@ -9,7 +9,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
     L.control.layers(baseLayers).addTo(map);
 
-    /** Search and Weather Features **/
+   /** Search Feature **/
+   const searchInput = document.getElementById("searchBar");
+   const searchButton = document.getElementById("searchButton");
+
+   searchButton.addEventListener("click", async () => {
+       const query = searchInput.value.trim();
+       if (!query) {
+           alert("Please enter a location to search.");
+           return;
+       }
+
+       const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+       try {
+           const response = await fetch(geocodeUrl);
+           if (!response.ok) throw new Error("Failed to fetch location data.");
+           
+           const results = await response.json();
+           if (results.length === 0) {
+               alert("No locations found. Try a different search term.");
+               return;
+           }
+
+           const { lat, lon, display_name } = results[0];
+           map.setView([lat, lon], 15);
+
+           const marker = L.marker([lat, lon]).addTo(map);
+           marker.bindPopup(`<b>${display_name}</b>`).openPopup();
+       } catch (error) {
+           console.error("Error searching location:", error);
+           alert("An error occurred while searching. Please try again.");
+       }
+   });
+   
+    /** Weather Features **/
     map.on("click", async function (e) {
         const { lat, lng } = e.latlng;
         const apiKey = "your_openweathermap_api_key";
