@@ -2,10 +2,10 @@
     document.addEventListener("DOMContentLoaded", function () {
         const loginForm = document.getElementById("loginForm");
 
-        if (!loginForm) {
-            console.error("Login form not found on the page.");
-            return;
-        }
+        // if (!loginForm) {
+        //     console.error("Login form not found on the page.");
+        //     return;
+        // }
 
         loginForm.addEventListener("submit", function (e) {
             e.preventDefault();
