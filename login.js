@@ -2,11 +2,6 @@
     document.addEventListener("DOMContentLoaded", function () {
         const loginForm = document.getElementById("loginForm");
 
-        // if (!loginForm) {
-        //     console.error("Login form not found on the page.");
-        //     return;
-        // }
-
         loginForm.addEventListener("submit", function (e) {
             e.preventDefault();
 
@@ -18,7 +13,7 @@
 
             // Input validation
             if (!username || !password) {
-                alert("Both username and password are required.");
+                displayMessage("Both username and password are required.", "error");
                 if (!username) usernameField.classList.add("error");
                 if (!password) passwordField.classList.add("error");
                 return;
@@ -32,11 +27,15 @@
             const isValid = validateCredentials(username, password);
 
             if (isValid) {
-                alert("Login successful!");
+                displayMessage("Login successful! Redirecting...", "success");
                 localStorage.setItem("loggedIn", "true"); // Set loggedIn flag
-                window.location.href = "index.html"; // Redirect to main app
+
+                // Redirect after 2 seconds
+                setTimeout(() => {
+                    window.location.href = "index.html"; // Redirect to main app
+                }, 2000);
             } else {
-                alert("Invalid username or password.");
+                displayMessage("Invalid username or password.", "error");
             }
         });
 
@@ -47,6 +46,20 @@
             const validPassword = "11335678";
 
             return username === validUsername && password === validPassword;
+        }
+
+        // Function to display messages without using alert()
+        function displayMessage(message, type) {
+            const messageContainer = document.createElement("div");
+            messageContainer.textContent = message;
+            messageContainer.className = `message ${type}`; // Add success or error class
+
+            document.body.appendChild(messageContainer);
+
+            // Remove the message after 3 seconds
+            setTimeout(() => {
+                messageContainer.remove();
+            }, 3000);
         }
     });
 })();
